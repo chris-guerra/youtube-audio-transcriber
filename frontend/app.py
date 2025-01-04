@@ -1,6 +1,5 @@
 import streamlit as st
 import requests
-import os
 
 # Backend URL
 BACKEND_URL = "http://backend:8000/download-audio/"
@@ -21,21 +20,21 @@ if st.button("Download Audio"):
         try:
             # Send request to backend
             response = requests.post(BACKEND_URL, json={"url": url})
-            
+
             # Handle response
             if response.status_code == 200:
                 data = response.json()
 
-                # Extract file path and title
-                file_path = data.get("file_path")
+                # Extract details
+                audio_url = f"http://localhost:8000{data['audio_url']}"  # Full URL for streaming
                 title = data.get("title")
 
                 # Display title
-                st.success(f"**Title:** {title}")
+                #st.success(f"**Title:** {title}")
 
                 # Display audio player
-                with st.expander("🎧 Play Audio", expanded=True):
-                    st.audio(file_path)
+                with st.expander(f"🎧 {title}", expanded=True):
+                    st.audio(audio_url)  # Use streaming URL for audio playback
 
             else:
                 st.error(f"Failed to download audio: {response.json()['detail']}")
