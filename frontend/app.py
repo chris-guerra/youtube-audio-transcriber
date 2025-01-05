@@ -1,43 +1,30 @@
 import streamlit as st
 import requests
 
-# Backend URL
-BACKEND_URL = "http://backend:8000/download-audio/"
+BACKEND_URL = "http://backend:8000/api/metadata/"
 
-# App Title
-st.title("YouTube Audio Downloader 🎵")
+st.title("YouTube Metadata Extractor 🎥")
 
-# Subtitle
-st.markdown("Enter a **YouTube URL** below to download and play audio!")
+url = st.text_input("Enter YouTube URL:")
+language = st.radio("Select Subtitle Language:", ["auto", "en", "es"], horizontal=True)
 
-# Input field for YouTube URL
-url = st.text_input("YouTube URL:", placeholder="Paste your YouTube link here...")
-
-# Submit button
-if st.button("Download Audio"):
-    # Show loading indicator
-    with st.spinner("Downloading and processing audio..."):
+if st.button("Extract Metadata"):
+    with st.spinner("Processing..."):
         try:
-            # Send request to backend
-            response = requests.post(BACKEND_URL, json={"url": url})
-
-            # Handle response
+            response = requests.post(BACKEND_URL, json={"url": url, "language": language})
             if response.status_code == 200:
                 data = response.json()
 
-                # Extract details
-                audio_url = f"http://localhost:8000{data['audio_url']}"  # Full URL for streaming
-                title = data.get("title")
+                st.subheader("Metadata")
+                st.write(f"**Title:** {data['metadata']['title']}")
+                st.write(f"**Description:** {data['metadata']['description']}")
+                st.write(f"**Upload Date:** {data['metadata']['upload_date']}")
+                st.write(f"**Tags:** {', '.join(data['metadata']['tags'] or [])}")
 
-                # Display title
-                #st.success(f"**Title:** {title}")
-
-                # Display audio player
-                with st.expander(f"🎧 {title}", expanded=True):
-                    st.audio(audio_url)  # Use streaming URL for audio playback
+                st.subheader("Cleaned Transcription")
+                st.text_area("Transcript:", data["transcription"], height=300)
 
             else:
-                st.error(f"Failed to download audio: {response.json()['detail']}")
-
+                st.error(f"Error: {response.json()['detail']}")
         except Exception as e:
-            st.error(f"An error occurred: {str(e)}")
+            st.error(f"Error: {str(e)}")

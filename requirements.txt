@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+yt-dlp
+langchain
+llama-cpp-python
+pydantic
+streamlit
+requests
